@@ -7,12 +7,12 @@ import time
 
 
 api_url = 'https://api.entur.io/realtime/v1/rest/et?datasetId=RUT'
-stop_point_ref = 'NSR:Quay:11870'
+stop_point_ref = 'NSR:Quay:12345' # Replace with your desired StopPointRef
 
 # MQTT details
-mqtt_broker = '10.1.1.21'
-mqtt_port = 1883
-mqtt_topic = '/entur2/' + stop_point_ref
+mqtt_broker = 'mqtt.example.com'  # Replace with your MQTT broker address
+mqtt_port = 1883    # Replace with your MQTT broker port
+mqtt_topic = '/entur/' + stop_point_ref # Replace with your desired MQTT topic
 
 # Function to check if XML data is complete
 def is_xml_data_complete(xml_data):
