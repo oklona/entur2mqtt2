@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 import re
 import time
+import os
 
 
 api_url = 'https://api.entur.io/realtime/v1/rest/et?datasetId=RUT'
@@ -13,6 +14,21 @@ stop_point_ref = 'NSR:Quay:12345' # Replace with your desired StopPointRef
 mqtt_broker = 'mqtt.example.com'  # Replace with your MQTT broker address
 mqtt_port = 1883    # Replace with your MQTT broker port
 mqtt_topic = '/entur/' + stop_point_ref # Replace with your desired MQTT topic
+mqtt_username = '' # Replace with your MQTT username (if required)
+mqtt_password = '' # Replace with your MQTT password (if required)
+
+
+# Now - word
+now_word = "Nå"
+
+# Override variables with environment variables if they exist
+stop_point_ref = os.getenv('STOP_POINT_REF', stop_point_ref)
+mqtt_broker = os.getenv('MQTT_BROKER', mqtt_broker)
+mqtt_port = int(os.getenv('MQTT_PORT', mqtt_port))
+mqtt_topic = os.getenv('MQTT_TOPIC', mqtt_topic)
+mqtt_username = os.getenv('MQTT_USERNAME', mqtt_username)
+mqtt_password = os.getenv('MQTT_PASSWORD', mqtt_password)
+now_word = os.getenv('NOW_WORD', now_word)
 
 # Function to check if XML data is complete
 def is_xml_data_complete(xml_data):
@@ -40,6 +56,8 @@ def get_api_data(api_url):
 # Function to publish data to MQTT
 def publish_to_mqtt(broker, port, topic, data):
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+    if mqtt_username and mqtt_password:
+        client.username_pw_set(mqtt_username, mqtt_password)
     client.connect(broker, port)
     client.publish(topic, data)
     client.disconnect()
@@ -116,7 +134,7 @@ if __name__ == '__main__':
             publish_to_mqtt(mqtt_broker, mqtt_port, mqtt_topic + "/vehicle" + str(entry_counter), convert_zeros_to_dash(entry['VehicleRef']))
             publish_to_mqtt(mqtt_broker, mqtt_port, mqtt_topic + "/Destination" + str(entry_counter), entry['DestinationDisplay'])
             if entry['MinutesToArrival'] == 0:
-                publish_to_mqtt(mqtt_broker, mqtt_port, mqtt_topic + "/departsIn" + str(entry_counter), "Nå")
+                publish_to_mqtt(mqtt_broker, mqtt_port, mqtt_topic + "/departsIn" + str(entry_counter), now_word)
             else:
                 publish_to_mqtt(mqtt_broker, mqtt_port, mqtt_topic + "/departsIn" + str(entry_counter), entry['MinutesToArrival'])
             print(entry)
